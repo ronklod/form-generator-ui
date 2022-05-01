@@ -1,13 +1,16 @@
 import React from 'react';
 import ReactDOM from 'react-dom/client';
+import "antd/dist/antd.css";
 import './index.css';
-import App from './App';
+import TableData from './features/dbTable/tableData'
+import TableSelector from "./features/dbTable/tableSelector";
 import reportWebVitals from './reportWebVitals';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    <App />
+    {/*<TableData />*/}
+      <TableSelector />
   </React.StrictMode>
 );
 

@@ -16,17 +16,28 @@ const  TableFormAdd = (props) => {
     const drawForm = () =>{
         const columns = props.columns;
         const rows = props.dataSource;
+        const fkData = props.f_key;
 
         let element = null
         const elements = [];
         for(let col of columns){
-
-            if(!col.auto_generated) {
-                element = <div key={col.name}>
-                            <span>{col.name}:</span>
-                            <input type="text" onChange={(e) => formElementOnChange(e, col)}/>
-                            <br/>
-                        </div>;
+            if(!col.auto_generated && col.name != "key") {
+                if(col.fk){
+                    element = <div key={col.name}>
+                        <span>{col.name}:</span>
+                        <select onChange={(e) => formElementOnChange(e, col)}>
+                            {getDropdownlistItems(col.name)}
+                        </select>
+                        <br/>
+                    </div>;
+                }
+                else {
+                    element = <div key={col.name}>
+                        <span>{col.name}:</span>
+                        <input type="text" onChange={(e) => formElementOnChange(e, col)}/>
+                        <br/>
+                    </div>;
+                }
 
                 elements.push(element);
                 formElements[col.name] = {};
@@ -34,6 +45,19 @@ const  TableFormAdd = (props) => {
         }
 
         return elements;
+    }
+
+    const getDropdownlistItems = (colName) =>{
+        const options = [];
+        for(let i=0; i<props.f_key.data.length;i++){
+            if(props.f_key.data[i].name == colName){
+                for(let j=0; j< props.f_key.data[i].value.recordset.length;j++){
+                    options.push(<option value={props.f_key.data[i].value.recordset[j].id} > {props.f_key.data[i].value.recordset[j].name} </option>)
+                }
+            }
+        }
+
+        return options;
     }
 
     const addEditItem = () => {

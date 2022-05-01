@@ -3,6 +3,7 @@ import { Table, Modal, Button } from 'antd';
 import TableFormAdd from "./tableFormAdd";
 import TableFormEditDynamic from "./tableFormEditDynamic";
 import serverApis from '../../ServerApis/serverApis';
+import {tab} from "@testing-library/user-event/dist/tab";
 
 let tableObj = null;
 
@@ -11,6 +12,7 @@ const  TableData = (props) => {
 
     const [tableColumns, setTableColumns] = useState(null);
     const [dataColumns, setDataColumns] = useState(null);
+    const [fkData, setFkData] = useState([]);
     const [rows, setRows] = useState([]);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
     const [isEditModalVisible, setIsEditModalVisible] = useState(false);
@@ -19,12 +21,10 @@ const  TableData = (props) => {
 
     const handleAddOk = () => {
         setIsAddModalVisible(false);
-
     };
 
     const handleAddCancel = () => {
         setIsAddModalVisible(false);
-
     };
 
     const handleEditOk = () => {
@@ -41,6 +41,7 @@ const  TableData = (props) => {
         tableObj = table.data;
         setDataColumns(tableObj.columns)
         prepareColumnsForDisplay(tableObj.columns);
+        setFkData(table.data.f_keys);
         setRows(tableObj.data.recordsets[0]);
     }
 
@@ -93,10 +94,10 @@ const  TableData = (props) => {
                 Add {props.table}
             </Button>
             <Modal title="Basic Modal" visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
-                <TableFormAdd table={props.table} columns={dataColumns} formKey={editKey} dataSource={rows}   />
+                <TableFormAdd table={props.table} columns={dataColumns} formKey={editKey} dataSource={rows} f_key={fkData}   />
             </Modal>
             <Modal title="Basic Modal" visible={isEditModalVisible} onOk={handleEditOk} onCancel={handleEditCancel}>
-                <TableFormEditDynamic table={props.table} columns={dataColumns} formKey={editKey} dataSource={selectedRow} />
+                <TableFormEditDynamic table={props.table} columns={dataColumns} formKey={editKey} dataSource={selectedRow} f_key={fkData} />
             </Modal>
 
             <Table columns={tableColumns} dataSource={rows} />

@@ -23,13 +23,24 @@ const  TableFormEditDynamic = (props) => {
 
     useEffect(()=>{
         let arr = [];
+        const fk =props.f_key;
         for(let k in props.dataSource){
             let colDef = null;
+            let fkData = null;
             for(let i=0;i<props.columns.length;i++){
-                if(props.columns[i].name == k)
+                if(props.columns[i].name == k) {
                     colDef = props.columns[i];
+                }
+
+                for(let j=0; j<fk.data.length;j++){
+                    if(fk.data[j].name == k){
+                        fkData = fk.data[j];
+                    }
+                }
+
+                //for(let j=0;j<)
             }
-            arr.push({name:k, value: props.dataSource[k], columnDefinition:colDef });
+            arr.push({name:k, value: props.dataSource[k], columnDefinition:colDef, fk:fkData });
         }
         setInputFields(arr);
 
@@ -54,22 +65,51 @@ const  TableFormEditDynamic = (props) => {
 
     }
 
+    const getDropdownlistItems = (data) =>{
+        const options = [];
+        for(let j=0; j< data.length;j++){
+            options.push(<option value={data[j].id} > {data[j].name} </option>)
+        }
+
+
+        return options;
+    }
+
     return (
         <>
             <form>
-                {inputFields.map((input, index) => {
-                    return (
-                        <div key={index}>
-                            <label>{input.name}</label>:
-                            <input
-                                name={input.name}
-                                placeholder=''
-                                value={input.value}
-                                onChange={event => handleFormChange(index,input,  event)}
-                            />
-                        </div>
-                    )
-                })}
+               {inputFields.map((input, index) => {
+                    if(input.name != "key" ) {
+                        if (input.columnDefinition && input.fk != null) {
+                            return (
+                                <div key={index}>
+                                    <label>{input.name}</label>:
+                                    <select
+                                        name={input.name}
+                                        value={input.value}
+                                        onChange={event => handleFormChange(index, input, event)}
+                                    >
+                                        {getDropdownlistItems(input.fk.value.recordset)}
+                                    </select>
+                                </div>
+                            )
+                        }else {
+                            return (
+                                <div key={index}>
+                                    <label>{input.name}</label>:
+
+                                    <input disabled={input.columnDefinition.pk}
+                                        name={input.name}
+                                        placeholder=''
+                                        value={input.value}
+                                        onChange={event => handleFormChange(index, input, event)}
+                                    />
+                                </div>
+                            )
+                        }
+                    }
+                })
+                }
 
             </form>
 

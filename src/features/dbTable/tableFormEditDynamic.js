@@ -15,7 +15,6 @@ const  TableFormEditDynamic = (props) => {
         for(let i=0; i<data.length;i++){
             if(data[i].name == event.target.name){
                 data[i].value = event.target.value;
-                //formElements[data[i].name] = {name: data[i].name , value: event.target.value, columnDefinition: JSON.stringify(data[i].columnDefinition)};
                 break;
             }
         }
@@ -75,7 +74,7 @@ const  TableFormEditDynamic = (props) => {
             </form>
 
             <Button type="primary" onClick={addEditItem} >
-                Add Item
+                Update Item
             </Button>
         </>
     )

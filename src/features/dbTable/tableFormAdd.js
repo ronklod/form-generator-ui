@@ -8,9 +8,14 @@ const {Option} = Select;
 const  TableFormAdd = (props) => {
 
     const [formElements, setFormElements] = useState({});
+    const [message, setMessage] = useState('');
 
-    const formElementOnChange = (e,element) => {
+    const formInputElementOnChange = (e,element) => {
         formElements[element.name] = {name: element.name, value: e.target.value, columnDefinition: JSON.stringify(element)};
+    }
+
+    const formSelectElementOnChange = (e,element) => {
+        formElements[element.name] = {name: element.name, value: e, columnDefinition: JSON.stringify(element)};
     }
 
     const drawForm = () =>{
@@ -28,7 +33,7 @@ const  TableFormAdd = (props) => {
                         name={col.name}
                         rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
                     >
-                        <Select style={{ width: 150 }} onChange={(e) => formElementOnChange(e, col)}>
+                        <Select style={{ width: 150 }} onChange={(e) => formSelectElementOnChange(e, col)}>
                             {getDropdownlistItems(col.name)}
                         </Select>
                     </Form.Item>
@@ -39,7 +44,7 @@ const  TableFormAdd = (props) => {
                         name={col.name}
                         rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
                     >
-                        <Input onChange={(e) => formElementOnChange(e, col)}/>
+                        <Input onChange={(e) => formInputElementOnChange(e, col)}/>
                     </Form.Item>
                 }
 
@@ -74,9 +79,9 @@ const  TableFormAdd = (props) => {
             }}
 
         serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
-            alert(e.message)
-        }, (error) => {
-            alert(error.message)
+            setMessage("Item added successfully!");
+        }, (e) => {
+            setMessage("error:" + e.message);
         });
     }
 
@@ -89,6 +94,10 @@ const  TableFormAdd = (props) => {
                 initialValues={{ remember: true }}
                 autoComplete="off"
             >
+
+                <Form.Item>
+                    <h2>{message}</h2>
+                </Form.Item>
                 {drawForm()}
 
                 <Form.Item>

@@ -6,17 +6,32 @@ import serverApis from '../../ServerApis/serverApis';
 let physicalObj = null;
 const {Option} = Select;
 
+
 const  TableFormEditDynamic = (props) => {
 
     const [inputFields, setInputFields] = useState([]);
     const [formElements, setFormElements] = useState({});
     const [originalValues, setOriginalValues] = useState([]);
+    const [message, setMessage] = useState('');
+    const [form] = Form.useForm();
 
-    const handleFormChange = (index,input,  event) => {
+
+    const handleInputFormChange = (index,input,  event) => {
         let data = [...inputFields];
         for(let i=0; i<data.length;i++){
-            if(data[i].name == event.target.name){
+            if(data[i].name == input.name){
                 data[i].value = event.target.value;
+                break;
+            }
+        }
+        setInputFields(data);
+    }
+
+    const handleSelectFormChange = (index,input,  event) => {
+        let data = [...inputFields];
+        for(let i=0; i<data.length;i++){
+            if(data[i].name == input.name){
+                data[i].value = event;
                 break;
             }
         }
@@ -42,6 +57,7 @@ const  TableFormEditDynamic = (props) => {
             }
             arr.push({name:k, value: props.dataSource[k], columnDefinition:colDef, fk:fkData });
         }
+
         setInputFields(arr);
         setOriginalValues(props.dataSource);
 
@@ -61,16 +77,16 @@ const  TableFormEditDynamic = (props) => {
 
         formData.append("key", props.formKey);
         serverApis.put('/table/' + props.table + '/', formData, headers, (e) => {
-            alert(e.message)
-        }, (error) => {
-            alert(error.message)
+            setMessage("Item updated successfully!");
+        }, (e) => {
+            setMessage("error:" + e.message);
         });
     }
 
     const getDropdownlistItems = (data) =>{
         const options = [];
         for(let j=0; j< data.length;j++){
-            options.push(<Option value={data[j].id} > {data[j].name} </Option>)
+            options.push(<option value={data[j].id} > {data[j].name} </option>)
         }
         return options;
     }
@@ -84,6 +100,10 @@ const  TableFormEditDynamic = (props) => {
                 initialValues={{ remember: true }}
                 autoComplete="off"
             >
+                <Form.Item>
+                    <h2>{message}</h2>
+                </Form.Item>
+
                {inputFields.map((col, index) => {
                     if(col.name != "key" ) {
                         if (col.columnDefinition && col.fk != null) {
@@ -95,11 +115,19 @@ const  TableFormEditDynamic = (props) => {
                                 >
                                     <Select
                                              name={col.name}
-                                             defaultValue={col.value}
-                                             onChange={event => handleFormChange(index, col, event)}
+                                             value={col.value}
+                                             onChange={event => handleSelectFormChange(index, col, event)}
                                     >
                                         {getDropdownlistItems(col.fk.value.recordset)}
                                     </Select>
+                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                    <select style={{display:'none'}}
+                                        name={col.name}
+                                        value={col.value}
+
+                                    >
+                                        {getDropdownlistItems(col.fk.value.recordset)}
+                                    </select>
 
                                 </Form.Item>
                             )
@@ -111,10 +139,12 @@ const  TableFormEditDynamic = (props) => {
                                     rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
                                 >
                                     <Input disabled={col.columnDefinition.pk}
-                                            name={col.name}
-                                            defaultValue={col.value}
-                                            onChange={event => handleFormChange(index, col, event)}
+                                            name={'eeee'}
+                                            value={col.value}
+                                            onChange={event => handleInputFormChange(index, col, event)}
                                         />
+                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                    <input type={"text"} value={col.value} style={{display:'none'}} />
                                 </Form.Item>
                             )
                         }

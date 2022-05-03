@@ -1,5 +1,5 @@
 import  {REACT,useState, useEffect } from 'react';
-import { Table, Modal, Button, Input, Select } from 'antd';
+import { Button, Input, Select, Form } from 'antd';
 import serverApis from '../../ServerApis/serverApis';
 
 let physicalObj = null;
@@ -23,20 +23,24 @@ const  TableFormAdd = (props) => {
         for(let col of columns){
             if(!col.auto_generated && col.name != "key") {
                 if(col.fk){
-                    element = <div key={col.name}>
-                        <span>{col.name}:</span>
+                    element = <Form.Item
+                        label={col.name}
+                        name={col.name}
+                        rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
+                    >
                         <Select style={{ width: 150 }} onChange={(e) => formElementOnChange(e, col)}>
                             {getDropdownlistItems(col.name)}
                         </Select>
-                        <br/>
-                    </div>;
+                    </Form.Item>
                 }
                 else {
-                    element = <div key={col.name}>
-                        <span>{col.name}:</span>
+                    element = <Form.Item
+                        label={col.name}
+                        name={col.name}
+                        rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
+                    >
                         <Input onChange={(e) => formElementOnChange(e, col)}/>
-                        <br/>
-                    </div>;
+                    </Form.Item>
                 }
 
                 elements.push(element);
@@ -78,11 +82,21 @@ const  TableFormAdd = (props) => {
 
     return (
         <>
-            {drawForm()}
+            <Form
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                initialValues={{ remember: true }}
+                autoComplete="off"
+            >
+                {drawForm()}
 
-            <Button type="primary" onClick={addEditItem}>
-                Add Item
-            </Button>
+                <Form.Item>
+                    <Button type="primary" onClick={addEditItem}>
+                        Add Item
+                    </Button>
+                </Form.Item>
+            </Form>
         </>
     )
 }

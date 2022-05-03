@@ -1,9 +1,10 @@
 import  {REACT,useState, useEffect } from 'react';
-import { Table, Modal, Button } from 'antd';
+import { Table, Modal, Button,Select,Input, Form } from 'antd';
 
 import serverApis from '../../ServerApis/serverApis';
 
 let physicalObj = null;
+const {Option} = Select;
 
 const  TableFormEditDynamic = (props) => {
 
@@ -69,51 +70,65 @@ const  TableFormEditDynamic = (props) => {
     const getDropdownlistItems = (data) =>{
         const options = [];
         for(let j=0; j< data.length;j++){
-            options.push(<option value={data[j].id} > {data[j].name} </option>)
+            options.push(<Option value={data[j].id} > {data[j].name} </Option>)
         }
         return options;
     }
 
     return (
         <>
-            <form>
-               {inputFields.map((input, index) => {
-                    if(input.name != "key" ) {
-                        if (input.columnDefinition && input.fk != null) {
+            <Form
+                name="basic"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+                initialValues={{ remember: true }}
+                autoComplete="off"
+            >
+               {inputFields.map((col, index) => {
+                    if(col.name != "key" ) {
+                        if (col.columnDefinition && col.fk != null) {
                             return (
-                                <div key={index}>
-                                    <label>{input.name}</label>:
-                                    <select
-                                        name={input.name}
-                                        value={input.value}
-                                        onChange={event => handleFormChange(index, input, event)}
+                                <Form.Item
+                                    label={col.name}
+                                    name={col.name}
+                                    rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
+                                >
+                                    <Select
+                                             name={col.name}
+                                             defaultValue={col.value}
+                                             onChange={event => handleFormChange(index, col, event)}
                                     >
-                                        {getDropdownlistItems(input.fk.value.recordset)}
-                                    </select>
-                                </div>
+                                        {getDropdownlistItems(col.fk.value.recordset)}
+                                    </Select>
+
+                                </Form.Item>
                             )
                         }else {
                             return (
-                                <div key={index}>
-                                    <label>{input.name}</label>:
-                                    <input disabled={input.columnDefinition.pk}
-                                        name={input.name}
-                                        placeholder=''
-                                        value={input.value}
-                                        onChange={event => handleFormChange(index, input, event)}
-                                    />
-                                </div>
+                                <Form.Item
+                                    label={col.name}
+                                    name={col.name}
+                                    rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
+                                >
+                                    <Input disabled={col.columnDefinition.pk}
+                                            name={col.name}
+                                            defaultValue={col.value}
+                                            onChange={event => handleFormChange(index, col, event)}
+                                        />
+                                </Form.Item>
                             )
                         }
                     }
                 })
            }
 
-            </form>
+                <Button type="primary" onClick={addEditItem} >
+                    Update Item
+                </Button>
 
-            <Button type="primary" onClick={addEditItem} >
-                Update Item
-            </Button>
+            </Form>
+
+
         </>
     )
 }

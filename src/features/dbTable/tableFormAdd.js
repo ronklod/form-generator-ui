@@ -1,9 +1,9 @@
 import  {REACT,useState, useEffect } from 'react';
-import { Table, Modal, Button } from 'antd';
-
+import { Table, Modal, Button, Input, Select } from 'antd';
 import serverApis from '../../ServerApis/serverApis';
 
 let physicalObj = null;
+const {Option} = Select;
 
 const  TableFormAdd = (props) => {
 
@@ -25,16 +25,16 @@ const  TableFormAdd = (props) => {
                 if(col.fk){
                     element = <div key={col.name}>
                         <span>{col.name}:</span>
-                        <select onChange={(e) => formElementOnChange(e, col)}>
+                        <Select style={{ width: 150 }} onChange={(e) => formElementOnChange(e, col)}>
                             {getDropdownlistItems(col.name)}
-                        </select>
+                        </Select>
                         <br/>
                     </div>;
                 }
                 else {
                     element = <div key={col.name}>
                         <span>{col.name}:</span>
-                        <input type="text" onChange={(e) => formElementOnChange(e, col)}/>
+                        <Input onChange={(e) => formElementOnChange(e, col)}/>
                         <br/>
                     </div>;
                 }
@@ -52,7 +52,7 @@ const  TableFormAdd = (props) => {
         for(let i=0; i<props.f_key.data.length;i++){
             if(props.f_key.data[i].name == colName){
                 for(let j=0; j< props.f_key.data[i].value.recordset.length;j++){
-                    options.push(<option value={props.f_key.data[i].value.recordset[j].id} > {props.f_key.data[i].value.recordset[j].name} </option>)
+                    options.push(<Option value={props.f_key.data[i].value.recordset[j].id} > {props.f_key.data[i].value.recordset[j].name} </Option>)
                 }
             }
         }

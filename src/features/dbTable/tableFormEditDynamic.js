@@ -9,6 +9,7 @@ const  TableFormEditDynamic = (props) => {
 
     const [inputFields, setInputFields] = useState([]);
     const [formElements, setFormElements] = useState({});
+    const [originalValues, setOriginalValues] = useState([]);
 
     const handleFormChange = (index,input,  event) => {
         let data = [...inputFields];
@@ -37,24 +38,25 @@ const  TableFormEditDynamic = (props) => {
                         fkData = fk.data[j];
                     }
                 }
-
-                //for(let j=0;j<)
             }
             arr.push({name:k, value: props.dataSource[k], columnDefinition:colDef, fk:fkData });
         }
         setInputFields(arr);
+        setOriginalValues(props.dataSource);
 
         },[props.table + "." + props.formKey ])
 
 
     const addEditItem = () => {
-
         let formData = new FormData();
         formData.append("tableData",JSON.stringify(inputFields));
+        formData.append("originalValues", JSON.stringify(originalValues));
+
         const headers = {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            }}
+            }
+        }
 
         formData.append("key", props.formKey);
         serverApis.put('/table/' + props.table + '/', formData, headers, (e) => {
@@ -62,7 +64,6 @@ const  TableFormEditDynamic = (props) => {
         }, (error) => {
             alert(error.message)
         });
-
     }
 
     const getDropdownlistItems = (data) =>{
@@ -70,8 +71,6 @@ const  TableFormEditDynamic = (props) => {
         for(let j=0; j< data.length;j++){
             options.push(<option value={data[j].id} > {data[j].name} </option>)
         }
-
-
         return options;
     }
 
@@ -97,7 +96,6 @@ const  TableFormEditDynamic = (props) => {
                             return (
                                 <div key={index}>
                                     <label>{input.name}</label>:
-
                                     <input disabled={input.columnDefinition.pk}
                                         name={input.name}
                                         placeholder=''
@@ -109,7 +107,7 @@ const  TableFormEditDynamic = (props) => {
                         }
                     }
                 })
-                }
+           }
 
             </form>
 

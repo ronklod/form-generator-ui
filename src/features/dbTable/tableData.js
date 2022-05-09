@@ -3,7 +3,17 @@ import { Table, Modal, Button } from 'antd';
 import TableFormAdd from "./tableFormAdd";
 import TableFormEditDynamic from "./tableFormEditDynamic";
 import serverApis from '../../ServerApis/serverApis';
-import {tab} from "@testing-library/user-event/dist/tab";
+import {useDispatch} from "react-redux";
+import {
+    setTable,
+    setDataSource,
+    setColumns,
+    setFKeys,
+    setFormKey,
+    setSelectedRow,
+    selectShowRightPanel,
+    setShowRightPanel, setPanels
+} from "./tableSlice";
 
 let tableObj = null;
 
@@ -15,9 +25,10 @@ const  TableData = (props) => {
     const [fkData, setFkData] = useState([]);
     const [rows, setRows] = useState([]);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    const [isEditModalVisible, setIsEditModalVisible] = useState(false);
     const [editKey, setEditKey] = useState('');
-    const [selectedRow, setSelectedRow] = useState('');
+
+
+    const dispatch = useDispatch();
 
     const handleAddOk = () => {
         setIsAddModalVisible(false);
@@ -27,22 +38,19 @@ const  TableData = (props) => {
         setIsAddModalVisible(false);
     };
 
-    const handleEditOk = () => {
-        setIsEditModalVisible(false);
-        setEditKey('');
-    };
-
-    const handleEditCancel = () => {
-        setIsEditModalVisible(false);
-        setEditKey('');
-    };
-
     const renderData = (table)=>{
         tableObj = table.data;
         setDataColumns(tableObj.columns)
         prepareColumnsForDisplay(tableObj.columns);
         setFkData(table.data.f_keys);
         setRows(tableObj.data.recordsets[0]);
+
+
+        dispatch(setTable(props.table));
+        dispatch(setFKeys(table.data.f_keys));
+        dispatch(setDataSource(tableObj.data.recordsets[0]));
+        dispatch(setColumns(tableObj.columns));
+
     }
 
     const prepareColumnsForDisplay  = (rawColumns) => {
@@ -67,14 +75,15 @@ const  TableData = (props) => {
             key: 'edit',
             render: (_, record) => {
                 return <Button type="primary" onClick={() => {
-                                    setEditKey(record.key);
-                                    setIsEditModalVisible(true);
-                                    setSelectedRow(record);
-                                }
+                            dispatch(setFormKey(record.key));
+                            dispatch(setSelectedRow(record));
+                            dispatch(setShowRightPanel(true));
+                            dispatch(setPanels([{name:'p1', size:0.7, comp: <TableData table={props.table} /> },{name:'p2', size:0.3, comp: <TableFormEditDynamic table={props.table}/> }]));
                             }
-                               >
-                            Edit
-                        </Button>
+                        }
+                    >
+                    Edit
+                </Button>
             },
         })
         setTableColumns(gridColumns);
@@ -85,21 +94,18 @@ const  TableData = (props) => {
     }
 
     useEffect(()=>{
-        serverApis.get('/table/'+ props.table +'/', renderData, ()=>{});
+        if(props.table != "")
+            serverApis.get('/table/'+ props.table +'/', renderData, ()=>{});
     },[props.table])
 
     return (
-        <div style={{marginTop:'20px'}}>
+        <div style={{marginTop:'20px', marginRight:'20px'}}>
             <Button type="primary" onClick={addModal}>
                 Add {props.table}
             </Button>
-            <Modal title="Basic Modal" visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
+            <Modal title={'Add ' + props.table} visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
                 <TableFormAdd table={props.table} columns={dataColumns} formKey={editKey} dataSource={rows} f_key={fkData}   />
             </Modal>
-            <Modal title="Basic Modal" visible={isEditModalVisible} onOk={handleEditOk} onCancel={handleEditCancel}>
-                <TableFormEditDynamic table={props.table} columns={dataColumns} formKey={editKey} dataSource={selectedRow} f_key={fkData} />
-            </Modal>
-
             <Table columns={tableColumns} dataSource={rows} />
         </div>
     )

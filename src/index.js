@@ -2,15 +2,18 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import "antd/dist/antd.css";
 import './index.css';
-import TableData from './features/dbTable/tableData'
-import TableSelector from "./features/dbTable/tableSelector";
+import {Provider} from "react-redux";
+import {store} from "./app/store";
+import MainPanel from "./features/dbTable/mainPanel";
 import reportWebVitals from './reportWebVitals';
+import './style/main.css';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
   <React.StrictMode>
-    {/*<TableData />*/}
-      <TableSelector />
+      <Provider store={store}>
+          <MainPanel />
+      </Provider>
   </React.StrictMode>
 );
 

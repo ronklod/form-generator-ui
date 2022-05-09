@@ -9,6 +9,8 @@ const  TableFormAdd = (props) => {
 
     const [formElements, setFormElements] = useState({});
     const [message, setMessage] = useState('');
+    const [form] = Form.useForm();
+
 
     const formInputElementOnChange = (e,element) => {
         formElements[element.name] = {name: element.name, value: e.target.value, columnDefinition: JSON.stringify(element)};
@@ -69,6 +71,21 @@ const  TableFormAdd = (props) => {
         return options;
     }
 
+    const resetForm = () => {
+        // const columns = props.columns;
+        //
+        // for(let col of columns){
+        //     formElements[col.name] = {};
+        // }
+        setFormElements([]);
+        form.resetFields();
+
+    }
+
+    // useEffect( () =>{
+    //     setFormElements([]);
+    // }, [])
+
     const addEditItem = () => {
         let formData = new FormData();
         formData.append("tableData",JSON.stringify(formElements));
@@ -80,10 +97,18 @@ const  TableFormAdd = (props) => {
 
         serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
             setMessage("Item added successfully!");
+
+            resetForm();
+
+
         }, (e) => {
             setMessage("error:" + e.message);
         });
     }
+
+    // useEffect(()=> {
+    //     drawForm();
+    // })
 
     return (
         <>

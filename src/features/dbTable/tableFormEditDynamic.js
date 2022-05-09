@@ -1,7 +1,18 @@
-import  {REACT,useState, useEffect } from 'react';
+import React, {REACT,useState, useEffect } from 'react';
 import { Table, Modal, Button,Select,Input, Form } from 'antd';
-
+import {useDispatch, useSelector} from "react-redux";
 import serverApis from '../../ServerApis/serverApis';
+import {
+    selectTableColumns,
+    selectDbTable,
+    selectFormKey,
+    selectDataSource,
+    selectF_keys,
+    selectSelectedRow,
+    setTable,
+    setShowRightPanel, setPanels
+} from "./tableSlice";
+import TableData from "./tableData";
 
 let physicalObj = null;
 const {Option} = Select;
@@ -9,9 +20,13 @@ const {Option} = Select;
 
 const  TableFormEditDynamic = (props) => {
 
+    const dispatch = useDispatch();
+    const f_keys = useSelector(selectF_keys);
+    const selectedRow = useSelector(selectSelectedRow);
+    const columns = useSelector(selectTableColumns);
+    const formKey = useSelector(selectFormKey);
+
     const [inputFields, setInputFields] = useState([]);
-    const [formElements, setFormElements] = useState({});
-    const [originalValues, setOriginalValues] = useState([]);
     const [message, setMessage] = useState('');
     const [form] = Form.useForm();
 
@@ -40,13 +55,14 @@ const  TableFormEditDynamic = (props) => {
 
     useEffect(()=>{
         let arr = [];
-        const fk =props.f_key;
-        for(let k in props.dataSource){
+        const fk = f_keys;
+
+        for(let k in selectedRow){
             let colDef = null;
             let fkData = null;
-            for(let i=0;i<props.columns.length;i++){
-                if(props.columns[i].name == k) {
-                    colDef = props.columns[i];
+            for(let i=0;i<columns.length;i++){
+                if(columns[i].name == k) {
+                    colDef = columns[i];
                 }
 
                 for(let j=0; j<fk.data.length;j++){
@@ -55,19 +71,18 @@ const  TableFormEditDynamic = (props) => {
                     }
                 }
             }
-            arr.push({name:k, value: props.dataSource[k], columnDefinition:colDef, fk:fkData });
+            arr.push({name:k, value: selectedRow[k], columnDefinition:colDef, fk:fkData });
         }
 
         setInputFields(arr);
-        setOriginalValues(props.dataSource);
 
-        },[props.table + "." + props.formKey ])
+        },[props.table + "." + formKey ])
 
 
     const addEditItem = () => {
         let formData = new FormData();
         formData.append("tableData",JSON.stringify(inputFields));
-        formData.append("originalValues", JSON.stringify(originalValues));
+        formData.append("originalValues", JSON.stringify(selectedRow));
 
         const headers = {
             headers: {
@@ -78,6 +93,11 @@ const  TableFormEditDynamic = (props) => {
         formData.append("key", props.formKey);
         serverApis.put('/table/' + props.table + '/', formData, headers, (e) => {
             setMessage("Item updated successfully!");
+            dispatch(setTable(""));
+            setTimeout(()=>{
+                dispatch(setTable(props.table));
+            }, 1);
+
         }, (e) => {
             setMessage("error:" + e.message);
         });
@@ -91,12 +111,16 @@ const  TableFormEditDynamic = (props) => {
         return options;
     }
 
+    const closeEditPanel = () => {
+        dispatch(setPanels([{name: 'p1', size: 1.0, comp: <TableData table={props.table}/>}]))
+    }
+
     return (
         <>
             <Form
                 name="basic"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 16 }}
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 18 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
             >
@@ -128,7 +152,6 @@ const  TableFormEditDynamic = (props) => {
                                     >
                                         {getDropdownlistItems(col.fk.value.recordset)}
                                     </select>
-
                                 </Form.Item>
                             )
                         }else {
@@ -152,13 +175,13 @@ const  TableFormEditDynamic = (props) => {
                 })
            }
 
-                <Button type="primary" onClick={addEditItem} >
-                    Update Item
-                </Button>
-
+           <div className="edit-panel-buttons">
+               <Button type="primary" style={{marginRight:'10px'}} onClick={addEditItem} >
+                   Update Item
+               </Button>
+               <Button  onClick={closeEditPanel}>Close</Button>
+           </div>
             </Form>
-
-
         </>
     )
 }

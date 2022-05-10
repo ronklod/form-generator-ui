@@ -1,135 +1,165 @@
-import  {REACT,useState, useEffect } from 'react';
-import { Button, Input, Select, Form } from 'antd';
+import React, {REACT,useState, useEffect } from 'react';
+import { Table, Modal, Button,Select,Input, Form } from 'antd';
+import {useDispatch, useSelector} from "react-redux";
 import serverApis from '../../ServerApis/serverApis';
+import {
+    selectTableColumns,
+    selectDbTable,
+    selectFormKey,
+    selectDataSource,
+    selectF_keys,
+    selectSelectedRow,
+    setTable,
+    setShowRightPanel, setPanels
+} from "./tableSlice";
+import TableData from "./tableData";
 
-let physicalObj = null;
 const {Option} = Select;
+
 
 const  TableFormAdd = (props) => {
 
-    const [formElements, setFormElements] = useState({});
+    const dispatch = useDispatch();
+    const f_keys = useSelector(selectF_keys);
+    const columns = useSelector(selectTableColumns);
+    const formKey = useSelector(selectFormKey);
+    const [inputFields, setInputFields] = useState([]);
     const [message, setMessage] = useState('');
     const [form] = Form.useForm();
 
-
-    const formInputElementOnChange = (e,element) => {
-        formElements[element.name] = {name: element.name, value: e.target.value, columnDefinition: JSON.stringify(element)};
-    }
-
-    const formSelectElementOnChange = (e,element) => {
-        formElements[element.name] = {name: element.name, value: e, columnDefinition: JSON.stringify(element)};
-    }
-
-    const drawForm = () =>{
-        const columns = props.columns;
-        const rows = props.dataSource;
-        const fkData = props.f_key;
-
-        let element = null
-        const elements = [];
-        for(let col of columns){
-            if(!col.auto_generated && col.name != "key") {
-                if(col.fk){
-                    element = <Form.Item
-                        label={col.name}
-                        name={col.name}
-                        rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
-                    >
-                        <Select style={{ width: 150 }} onChange={(e) => formSelectElementOnChange(e, col)}>
-                            {getDropdownlistItems(col.name)}
-                        </Select>
-                    </Form.Item>
-                }
-                else {
-                    element = <Form.Item
-                        label={col.name}
-                        name={col.name}
-                        rules={[{ required: !col.nullable, message: 'Please input your username!' }]}
-                    >
-                        <Input onChange={(e) => formInputElementOnChange(e, col)}/>
-                    </Form.Item>
-                }
-
-                elements.push(element);
-                formElements[col.name] = {};
+    const handleInputFormChange = (index,input,  event) => {
+        let data = [...inputFields];
+        for(let i=0; i<data.length;i++){
+            if(data[i].name == input.name){
+                data[i].value = event.target.value;
+                break;
             }
         }
-
-        return elements;
+        setInputFields(data);
     }
 
-    const getDropdownlistItems = (colName) =>{
-        const options = [];
-        for(let i=0; i<props.f_key.data.length;i++){
-            if(props.f_key.data[i].name == colName){
-                for(let j=0; j< props.f_key.data[i].value.recordset.length;j++){
-                    options.push(<Option value={props.f_key.data[i].value.recordset[j].id} > {props.f_key.data[i].value.recordset[j].name} </Option>)
-                }
+    const handleSelectFormChange = (index,input,  event) => {
+        let data = [...inputFields];
+        for(let i=0; i<data.length;i++){
+            if(data[i].name == input.name){
+                data[i].value = event;
+                break;
             }
         }
-
-        return options;
+        setInputFields(data);
     }
 
-    const resetForm = () => {
-        // const columns = props.columns;
-        //
-        // for(let col of columns){
-        //     formElements[col.name] = {};
-        // }
-        setFormElements([]);
-        form.resetFields();
+    useEffect(()=>{
+        let arr = [];
+        const fk = f_keys;
+        for(let i=0;i<columns.length;i++) {
+            if(!columns[i].auto_generated) {
+                let fkData = null;
+                for (let j = 0; j < fk.data.length; j++) {
+                    if (fk.data[j].name == columns[i].name) {
+                        fkData = fk.data[j];
+                    }
+                }
+                arr.push({name: columns[i].name, value: '', columnDefinition: columns[i], fk: fkData});
+            }
+        }
+        setInputFields(arr);
 
-    }
+    },[props.table + "." + formKey ])
 
-    // useEffect( () =>{
-    //     setFormElements([]);
-    // }, [])
 
-    const addEditItem = () => {
+    const addItem = () => {
         let formData = new FormData();
-        formData.append("tableData",JSON.stringify(formElements));
+        formData.append("tableData",JSON.stringify(inputFields));
 
         const headers = {
             headers: {
                 'Content-Type': 'multipart/form-data',
-            }}
+            }
+        }
 
         serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
             setMessage("Item added successfully!");
-
-            resetForm();
-
-
+            form.resetFields();
         }, (e) => {
             setMessage("error:" + e.message);
         });
     }
 
-    // useEffect(()=> {
-    //     drawForm();
-    // })
+    const getDropdownlistItems = (data) =>{
+        const options = [];
+        for(let j=0; j< data.length;j++){
+            options.push(<Option value={data[j].id} > {data[j].name} </Option>)
+        }
+        return options;
+    }
 
     return (
         <>
             <Form
                 name="basic"
-                labelCol={{ span: 8 }}
-                wrapperCol={{ span: 16 }}
+                labelCol={{ span: 4 }}
+                wrapperCol={{ span: 18 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
+                onFinish={addItem}
             >
-
                 <Form.Item>
                     <h2>{message}</h2>
                 </Form.Item>
-                {drawForm()}
 
-                <Form.Item>
-                    <Button type="primary" onClick={addEditItem}>
+                {inputFields.map((col, index) => {
+                    if(col.name != "key" ) {
+                        if (col.columnDefinition && col.fk != null ) {
+                            return (
+                                <Form.Item
+                                    label={col.name}
+                                    name={col.name}
+                                    rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
+                                >
+                                    <Select
+                                        name={col.name}
+                                        value={col.value}
+                                        onChange={event => handleSelectFormChange(index, col, event)}
+                                    >
+                                        {getDropdownlistItems(col.fk.value.recordset)}
+                                    </Select>
+                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                    <select style={{display:'none'}}
+                                            name={col.name}
+                                            value={col.value}
+
+                                    >
+                                        {getDropdownlistItems(col.fk.value.recordset)}
+                                    </select>
+                                </Form.Item>
+                            )
+                        }else {
+                            return (
+                                <Form.Item
+                                    label={col.name}
+                                    name={col.name}
+                                    rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
+                                >
+                                    <Input disabled={col.columnDefinition.pk}
+                                           name={'eeee'}
+                                           value={col.value}
+                                           onChange={event => handleInputFormChange(index, col, event)}
+                                    />
+                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                    <input type={"text"} value={col.value} style={{display:'none'}} />
+                                </Form.Item>
+                            )
+                        }
+                    }
+                })
+                }
+
+                <div className="edit-panel-buttons">
+                    <Button htmlType="submit"  type="primary" style={{marginRight:'10px'}} onClick={addItem} >
                         Add Item
                     </Button>
-                </Form.Item>
+                </div>
             </Form>
         </>
     )

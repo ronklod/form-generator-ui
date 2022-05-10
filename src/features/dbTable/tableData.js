@@ -45,7 +45,6 @@ const  TableData = (props) => {
         setFkData(table.data.f_keys);
         setRows(tableObj.data.recordsets[0]);
 
-
         dispatch(setTable(props.table));
         dispatch(setFKeys(table.data.f_keys));
         dispatch(setDataSource(tableObj.data.recordsets[0]));
@@ -104,7 +103,7 @@ const  TableData = (props) => {
                 Add {props.table}
             </Button>
             <Modal title={'Add ' + props.table} visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
-                <TableFormAdd table={props.table} columns={dataColumns} formKey={editKey} dataSource={rows} f_key={fkData}   />
+                <TableFormAdd table={props.table}   />
             </Modal>
             <Table columns={tableColumns} dataSource={rows} />
         </div>

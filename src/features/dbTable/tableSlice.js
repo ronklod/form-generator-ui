@@ -8,7 +8,7 @@ const initialState = {
     f_key:[],
     selectedRow: [],
     showRightPanel:false,
-    panels: []
+    panels: [],
 };
 
 export const tableSlice = createSlice({
@@ -55,7 +55,6 @@ export const tableSlice = createSlice({
             console.log(action.payload + " type: " + action.type);
             state.panels = action.payload;
         },
-
     }
 });
 

@@ -3,7 +3,7 @@ import { Table, Modal, Button, notification } from 'antd';
 import TableFormAdd from "./tableFormAdd";
 import TableFormEditDynamic from "./tableFormEditDynamic";
 import serverApis from '../../ServerApis/serverApis';
-import {useDispatch} from "react-redux";
+import {useDispatch, useSelector} from "react-redux";
 import {
     setTable,
     setDataSource,
@@ -12,7 +12,7 @@ import {
     setFormKey,
     setSelectedRow,
     setShowRightPanel,
-    setPanels
+    setPanels, selectSelectedRow, selectDataSource, selectTableColumns
 } from "./tableSlice";
 
 const  TableData = (props) => {
@@ -23,7 +23,6 @@ const  TableData = (props) => {
     const [addInputFields, setAddInputFields] = useState([]);
     const [form, setForm] = useState(null);
     const dispatch = useDispatch();
-
 
     const handleAddOk = () => {
         let formData = new FormData();
@@ -109,6 +108,20 @@ const  TableData = (props) => {
                 </Button>
             },
         })
+
+        gridColumns.push({
+            title: 'Delete',
+            dataIndex: '',
+            key: 'edit',
+            render: (_, record) => {
+                return <Button type="primary" onClick={() => {
+                    alert('not implemented yet')
+                    }} >
+                    Delete
+                </Button>
+            },
+        })
+
         setTableColumns(gridColumns);
     }
 

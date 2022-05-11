@@ -1,5 +1,5 @@
 import React, {REACT,useState, useEffect } from 'react';
-import { Select,Input, Form } from 'antd';
+import { Select,Input, Form, InputNumber } from 'antd';
 import { useSelector} from "react-redux";
 import {
     selectTableColumns,
@@ -21,6 +21,21 @@ const  TableFormAdd = (props) => {
         for(let i=0; i<data.length;i++){
             if(data[i].name == input.name){
                 data[i].value = event.target.value;
+                break;
+            }
+        }
+        setInputFields(data);
+        props.setInputFields(data);
+    }
+
+    const handleInputNumberFormChange = (index,input,  event) => {
+        if(!Number(event))
+            return;
+
+        let data = [...inputFields];
+        for(let i=0; i<data.length;i++){
+            if(data[i].name == input.name){
+                data[i].value = event;
                 break;
             }
         }
@@ -68,6 +83,19 @@ const  TableFormAdd = (props) => {
         return options;
     }
 
+    const drawInputElement = (col, index) => {
+        if(col.columnDefinition.type.toLowerCase().indexOf("int") >= 0){
+            return <InputNumber min={0} max={100} onChange={event => handleInputNumberFormChange(index, col, event)} />
+        }
+        else{
+            return <Input disabled={col.columnDefinition.pk}
+                   name={'eeee'}
+                   value={col.value}
+                   onChange={event => handleInputFormChange(index, col, event)}
+            />
+        }
+    }
+
     return (
         <>
             <Form
@@ -110,11 +138,7 @@ const  TableFormAdd = (props) => {
                                         name={col.name}
                                         rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
                                     >
-                                        <Input disabled={col.columnDefinition.pk}
-                                               name={'eeee'}
-                                               value={col.value}
-                                               onChange={event => handleInputFormChange(index, col, event)}
-                                        />
+                                        {drawInputElement(col,index)}
                                         {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
                                         <input type={"text"} value={col.value} style={{display:'none'}} />
                                     </Form.Item>

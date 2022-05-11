@@ -1,22 +1,16 @@
 import React, {REACT,useState, useEffect } from 'react';
-import { Table, Modal, Button,Select,Input, Form } from 'antd';
+import { Button,Select,Input, Form, notification } from 'antd';
 import {useDispatch, useSelector} from "react-redux";
 import serverApis from '../../ServerApis/serverApis';
 import {
     selectTableColumns,
-    selectDbTable,
     selectFormKey,
-    selectDataSource,
     selectF_keys,
     selectSelectedRow,
     setTable,
-    setShowRightPanel, setPanels
+    setPanels
 } from "./tableSlice";
 import TableData from "./tableData";
-
-let physicalObj = null;
-const {Option} = Select;
-
 
 const  TableFormEditDynamic = (props) => {
 
@@ -25,11 +19,7 @@ const  TableFormEditDynamic = (props) => {
     const selectedRow = useSelector(selectSelectedRow);
     const columns = useSelector(selectTableColumns);
     const formKey = useSelector(selectFormKey);
-
     const [inputFields, setInputFields] = useState([]);
-    const [message, setMessage] = useState('');
-    const [form] = Form.useForm();
-
 
     const handleInputFormChange = (index,input,  event) => {
         let data = [...inputFields];
@@ -92,14 +82,23 @@ const  TableFormEditDynamic = (props) => {
 
         formData.append("key", props.formKey);
         serverApis.put('/table/' + props.table + '/', formData, headers, (e) => {
-            setMessage("Item updated successfully!");
+            notification['success']({
+                message: 'Item updated successfully' ,
+                description:
+                    `Item updated successfully in table: ${props.table}.`,
+            });
+
             dispatch(setTable(""));
             setTimeout(()=>{
                 dispatch(setTable(props.table));
             }, 1);
 
         }, (e) => {
-            setMessage("error:" + e.message);
+            notification['error']({
+                message: 'Error' ,
+                description:
+                    `${e.message}.`,
+            });
         });
     }
 
@@ -124,9 +123,9 @@ const  TableFormEditDynamic = (props) => {
                 initialValues={{ remember: true }}
                 autoComplete="off"
             >
-                <Form.Item>
-                    <h2>{message}</h2>
-                </Form.Item>
+                {/*<Form.Item>*/}
+                {/*    <h2>{message}</h2>*/}
+                {/*</Form.Item>*/}
 
                {inputFields.map((col, index) => {
                     if(col.name != "key" ) {

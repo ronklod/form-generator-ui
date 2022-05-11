@@ -1,5 +1,5 @@
 import React, {useState, useEffect } from 'react';
-import { Table, Modal, Button } from 'antd';
+import { Table, Modal, Button, notification } from 'antd';
 import TableFormAdd from "./tableFormAdd";
 import TableFormEditDynamic from "./tableFormEditDynamic";
 import serverApis from '../../ServerApis/serverApis';
@@ -11,8 +11,8 @@ import {
     setFKeys,
     setFormKey,
     setSelectedRow,
-    selectShowRightPanel,
-    setShowRightPanel, setPanels
+    setShowRightPanel,
+    setPanels
 } from "./tableSlice";
 
 let tableObj = null;
@@ -22,16 +22,41 @@ const  TableData = (props) => {
 
     const [tableColumns, setTableColumns] = useState(null);
     const [dataColumns, setDataColumns] = useState(null);
-    const [fkData, setFkData] = useState([]);
+   // const [fkData, setFkData] = useState([]);
     const [rows, setRows] = useState([]);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    const [editKey, setEditKey] = useState('');
-
-
+    //const [editKey, setEditKey] = useState('');
+    const [addInputFields, setAddInputFields] = useState([]);
     const dispatch = useDispatch();
 
+
     const handleAddOk = () => {
-        setIsAddModalVisible(false);
+        let formData = new FormData();
+        formData.append("tableData",JSON.stringify(addInputFields));
+
+        const headers = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        }
+
+        serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
+
+            notification['success']({
+                message: 'Item added successfully' ,
+                description:
+                    `Items added successfully to table: ${props.table}.`,
+            });
+            //form.resetFields();
+
+            setIsAddModalVisible(false);
+        }, (e) => {
+            notification['error']({
+                message: 'Error' ,
+                description:
+                    `${e.message}.`,
+            });
+        });
     };
 
     const handleAddCancel = () => {
@@ -40,9 +65,9 @@ const  TableData = (props) => {
 
     const renderData = (table)=>{
         tableObj = table.data;
-        setDataColumns(tableObj.columns)
+        //setDataColumns(tableObj.columns)
         prepareColumnsForDisplay(tableObj.columns);
-        setFkData(table.data.f_keys);
+        //setFkData(table.data.f_keys);
         setRows(tableObj.data.recordsets[0]);
 
         dispatch(setTable(props.table));
@@ -103,7 +128,7 @@ const  TableData = (props) => {
                 Add {props.table}
             </Button>
             <Modal title={'Add ' + props.table} visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
-                <TableFormAdd table={props.table}   />
+                <TableFormAdd table={props.table} setInputFields={setAddInputFields}   />
             </Modal>
             <Table columns={tableColumns} dataSource={rows} />
         </div>

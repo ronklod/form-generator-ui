@@ -9,6 +9,7 @@ const initialState = {
     selectedRow: [],
     showRightPanel:false,
     panels: [],
+
 };
 
 export const tableSlice = createSlice({
@@ -17,42 +18,34 @@ export const tableSlice = createSlice({
     // The `reducers` field lets us define reducers and generate associated actions
     reducers: {
         setTable: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.table = action.payload;
         },
 
         setColumns: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.columns = action.payload;
         },
 
         setFormKey: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.formKey = action.payload;
         },
 
         setDataSource: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.dataSource = action.payload;
         },
 
         setFKeys: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.f_key = action.payload;
         },
 
         setSelectedRow: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.selectedRow = action.payload;
         },
 
         setShowRightPanel: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.showRightPanel = action.payload;
         },
 
         setPanels: (state, action) => {
-            console.log(action.payload + " type: " + action.type);
             state.panels = action.payload;
         },
     }

@@ -10,7 +10,7 @@ import {
     selectF_keys,
     selectSelectedRow,
     setTable,
-    setShowRightPanel, setPanels
+    setShowRightPanel, setPanels, setAddInputFields, updateAddInputField
 } from "./tableSlice";
 import TableData from "./tableData";
 
@@ -36,6 +36,7 @@ const  TableFormAdd = (props) => {
             }
         }
         setInputFields(data);
+        props.setInputFields(data);
     }
 
     const handleSelectFormChange = (index,input,  event) => {
@@ -47,6 +48,7 @@ const  TableFormAdd = (props) => {
             }
         }
         setInputFields(data);
+        props.setInputFields(data);
     }
 
     useEffect(()=>{
@@ -64,27 +66,9 @@ const  TableFormAdd = (props) => {
             }
         }
         setInputFields(arr);
+        props.setInputFields(arr);
 
     },[props.table + "." + formKey ])
-
-
-    const addItem = () => {
-        let formData = new FormData();
-        formData.append("tableData",JSON.stringify(inputFields));
-
-        const headers = {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            }
-        }
-
-        serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
-            setMessage("Item added successfully!");
-            form.resetFields();
-        }, (e) => {
-            setMessage("error:" + e.message);
-        });
-    }
 
     const getDropdownlistItems = (data) =>{
         const options = [];
@@ -102,7 +86,7 @@ const  TableFormAdd = (props) => {
                 wrapperCol={{ span: 18 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
-                onFinish={addItem}
+                // onFinish={addItem}
             >
                 <Form.Item>
                     <h2>{message}</h2>
@@ -156,9 +140,9 @@ const  TableFormAdd = (props) => {
                 }
 
                 <div className="edit-panel-buttons">
-                    <Button htmlType="submit"  type="primary" style={{marginRight:'10px'}} onClick={addItem} >
-                        Add Item
-                    </Button>
+                    {/*<Button htmlType="submit"  type="primary" style={{marginRight:'10px'}} onClick={addItem} >*/}
+                    {/*    Add Item*/}
+                    {/*</Button>*/}
                 </div>
             </Form>
         </>

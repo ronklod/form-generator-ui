@@ -123,9 +123,10 @@ const  TableData = (props) => {
 
     return (
         <div style={{marginTop:'20px', marginRight:'20px'}}>
-            <Button type="primary" onClick={addModal}>
+            {props.table !="" ? <Button type="primary" onClick={addModal}>
                 Add {props.table}
-            </Button>
+            </Button> : <></>}
+
             <Modal title={'Add ' + props.table} visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
                 <TableFormAdd table={props.table} setInputFields={setAddInputFields} setFormObj={setForm}   />
             </Modal>

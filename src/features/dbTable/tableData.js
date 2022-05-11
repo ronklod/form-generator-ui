@@ -15,18 +15,13 @@ import {
     setPanels
 } from "./tableSlice";
 
-let tableObj = null;
-
-
 const  TableData = (props) => {
 
     const [tableColumns, setTableColumns] = useState(null);
-    const [dataColumns, setDataColumns] = useState(null);
-   // const [fkData, setFkData] = useState([]);
     const [rows, setRows] = useState([]);
     const [isAddModalVisible, setIsAddModalVisible] = useState(false);
-    //const [editKey, setEditKey] = useState('');
     const [addInputFields, setAddInputFields] = useState([]);
+    const [form, setForm] = useState(null);
     const dispatch = useDispatch();
 
 
@@ -42,14 +37,22 @@ const  TableData = (props) => {
 
         serverApis.post('/table/' + props.table + '/', formData, headers, (e) => {
 
+            //this is done to refresh the page, since the use effect has the table name as dependant object, so in order to re-load the page
+            //i simply change the table twice, one time i set it to string empty and them i set it to the corect table
+            dispatch(setTable(""));
+            setTimeout(()=>{
+                dispatch(setTable(props.table));
+            }, 1);
+
             notification['success']({
                 message: 'Item added successfully' ,
                 description:
-                    `Items added successfully to table: ${props.table}.`,
+                    `Item added successfully to table: ${props.table}.`,
             });
-            //form.resetFields();
 
+            form.resetFields();
             setIsAddModalVisible(false);
+
         }, (e) => {
             notification['error']({
                 message: 'Error' ,
@@ -64,17 +67,13 @@ const  TableData = (props) => {
     };
 
     const renderData = (table)=>{
-        tableObj = table.data;
-        //setDataColumns(tableObj.columns)
+        let tableObj = table.data;
         prepareColumnsForDisplay(tableObj.columns);
-        //setFkData(table.data.f_keys);
         setRows(tableObj.data.recordsets[0]);
-
         dispatch(setTable(props.table));
         dispatch(setFKeys(table.data.f_keys));
         dispatch(setDataSource(tableObj.data.recordsets[0]));
         dispatch(setColumns(tableObj.columns));
-
     }
 
     const prepareColumnsForDisplay  = (rawColumns) => {
@@ -128,7 +127,7 @@ const  TableData = (props) => {
                 Add {props.table}
             </Button>
             <Modal title={'Add ' + props.table} visible={isAddModalVisible} onOk={handleAddOk} onCancel={handleAddCancel}>
-                <TableFormAdd table={props.table} setInputFields={setAddInputFields}   />
+                <TableFormAdd table={props.table} setInputFields={setAddInputFields} setFormObj={setForm}   />
             </Modal>
             <Table columns={tableColumns} dataSource={rows} />
         </div>

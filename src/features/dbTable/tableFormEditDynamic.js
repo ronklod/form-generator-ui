@@ -88,6 +88,8 @@ const  TableFormEditDynamic = (props) => {
                     `Item updated successfully in table: ${props.table}.`,
             });
 
+            //this is done to refresh the page, since the use effect has the table name as dependant object, so in order to re-load the page
+            //i simply change the table twice, one time i set it to string empty and them i set it to the corect table
             dispatch(setTable(""));
             setTimeout(()=>{
                 dispatch(setTable(props.table));
@@ -123,10 +125,6 @@ const  TableFormEditDynamic = (props) => {
                 initialValues={{ remember: true }}
                 autoComplete="off"
             >
-                {/*<Form.Item>*/}
-                {/*    <h2>{message}</h2>*/}
-                {/*</Form.Item>*/}
-
                {inputFields.map((col, index) => {
                     if(col.name != "key" ) {
                         if (col.columnDefinition && col.fk != null) {

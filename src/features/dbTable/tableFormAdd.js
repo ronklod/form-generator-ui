@@ -1,30 +1,19 @@
 import React, {REACT,useState, useEffect } from 'react';
-import { Table, Modal, Button,Select,Input, Form } from 'antd';
-import {useDispatch, useSelector} from "react-redux";
-import serverApis from '../../ServerApis/serverApis';
+import { Select,Input, Form } from 'antd';
+import { useSelector} from "react-redux";
 import {
     selectTableColumns,
-    selectDbTable,
     selectFormKey,
-    selectDataSource,
     selectF_keys,
-    selectSelectedRow,
-    setTable,
-    setShowRightPanel, setPanels, setAddInputFields, updateAddInputField
 } from "./tableSlice";
-import TableData from "./tableData";
 
 const {Option} = Select;
 
-
 const  TableFormAdd = (props) => {
-
-    const dispatch = useDispatch();
     const f_keys = useSelector(selectF_keys);
     const columns = useSelector(selectTableColumns);
     const formKey = useSelector(selectFormKey);
     const [inputFields, setInputFields] = useState([]);
-    const [message, setMessage] = useState('');
     const [form] = Form.useForm();
 
     const handleInputFormChange = (index,input,  event) => {
@@ -67,6 +56,7 @@ const  TableFormAdd = (props) => {
         }
         setInputFields(arr);
         props.setInputFields(arr);
+        props.setFormObj(form);
 
     },[props.table + "." + formKey ])
 
@@ -86,64 +76,54 @@ const  TableFormAdd = (props) => {
                 wrapperCol={{ span: 18 }}
                 initialValues={{ remember: true }}
                 autoComplete="off"
-                // onFinish={addItem}
             >
-                <Form.Item>
-                    <h2>{message}</h2>
-                </Form.Item>
-
-                {inputFields.map((col, index) => {
-                    if(col.name != "key" ) {
-                        if (col.columnDefinition && col.fk != null ) {
-                            return (
-                                <Form.Item
-                                    label={col.name}
-                                    name={col.name}
-                                    rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
-                                >
-                                    <Select
+                    {inputFields.map((col, index) => {
+                        if(col.name != "key" ) {
+                            if (col.columnDefinition && col.fk != null ) {
+                                return (
+                                    <Form.Item
+                                        label={col.name}
                                         name={col.name}
-                                        value={col.value}
-                                        onChange={event => handleSelectFormChange(index, col, event)}
+                                        rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
                                     >
-                                        {getDropdownlistItems(col.fk.value.recordset)}
-                                    </Select>
-                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
-                                    <select style={{display:'none'}}
+                                        <Select
                                             name={col.name}
                                             value={col.value}
+                                            onChange={event => handleSelectFormChange(index, col, event)}
+                                        >
+                                            {getDropdownlistItems(col.fk.value.recordset)}
+                                        </Select>
+                                        {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                        <select style={{display:'none'}}
+                                                name={col.name}
+                                                value={col.value}
 
+                                        >
+                                            {getDropdownlistItems(col.fk.value.recordset)}
+                                        </select>
+                                    </Form.Item>
+                                )
+                            }else {
+                                return (
+                                    <Form.Item
+                                        label={col.name}
+                                        name={col.name}
+                                        rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
                                     >
-                                        {getDropdownlistItems(col.fk.value.recordset)}
-                                    </select>
-                                </Form.Item>
-                            )
-                        }else {
-                            return (
-                                <Form.Item
-                                    label={col.name}
-                                    name={col.name}
-                                    rules={[{ required: !col.nullable, message: 'Field cannot be empty!' }]}
-                                >
-                                    <Input disabled={col.columnDefinition.pk}
-                                           name={'eeee'}
-                                           value={col.value}
-                                           onChange={event => handleInputFormChange(index, col, event)}
-                                    />
-                                    {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
-                                    <input type={"text"} value={col.value} style={{display:'none'}} />
-                                </Form.Item>
-                            )
+                                        <Input disabled={col.columnDefinition.pk}
+                                               name={'eeee'}
+                                               value={col.value}
+                                               onChange={event => handleInputFormChange(index, col, event)}
+                                        />
+                                        {/*//ugly workaround to get the value on the ant design input - check how to fix this*/}
+                                        <input type={"text"} value={col.value} style={{display:'none'}} />
+                                    </Form.Item>
+                                )
+                            }
                         }
-                    }
-                })
+                    })
                 }
 
-                <div className="edit-panel-buttons">
-                    {/*<Button htmlType="submit"  type="primary" style={{marginRight:'10px'}} onClick={addItem} >*/}
-                    {/*    Add Item*/}
-                    {/*</Button>*/}
-                </div>
             </Form>
         </>
     )

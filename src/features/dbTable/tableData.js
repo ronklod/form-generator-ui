@@ -3,7 +3,7 @@ import { Table, Modal, Button, notification } from 'antd';
 import TableFormAdd from "./tableFormAdd";
 import TableFormEditDynamic from "./tableFormEditDynamic";
 import serverApis from '../../ServerApis/serverApis';
-import {useDispatch, useSelector} from "react-redux";
+import {useDispatch} from "react-redux";
 import {
     setTable,
     setDataSource,
@@ -12,7 +12,7 @@ import {
     setFormKey,
     setSelectedRow,
     setShowRightPanel,
-    setPanels, selectSelectedRow, selectDataSource, selectTableColumns
+    setPanels
 } from "./tableSlice";
 
 const  TableData = (props) => {
@@ -23,6 +23,7 @@ const  TableData = (props) => {
     const [addInputFields, setAddInputFields] = useState([]);
     const [form, setForm] = useState(null);
     const dispatch = useDispatch();
+    //const ds = useSelector(selectDataSource);
 
     const handleAddOk = () => {
         let formData = new FormData();
@@ -75,6 +76,41 @@ const  TableData = (props) => {
         dispatch(setColumns(tableObj.columns));
     }
 
+    const handleDeleteItem = (key, record, colDef) => {
+        let formData = new FormData();
+        formData.append("rawData",JSON.stringify(record));
+        formData.append("colDef",JSON.stringify(colDef));
+
+        const headers = {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            }
+        }
+
+        serverApis.del('/table/' + props.table + '/', formData,headers, (e) => {
+            //this is done to refresh the page, since the use effect has the table name as dependant object, so in order to re-load the page
+            //i simply change the table twice, one time i set it to string empty and them i set it to the corect table
+            dispatch(setTable(""));
+            setTimeout(()=>{
+                dispatch(setTable(props.table));
+            }, 1);
+
+            notification['success']({
+                message: 'Item was deleted successfully' ,
+                description:
+                    `Item was successfully from table: ${props.table}.`,
+            });
+
+        }, (e) => {
+            let a = e;
+            notification['error']({
+                message: 'Error' ,
+                description:
+                    `${e.response.data}.`,
+            });
+        });
+    }
+
     const prepareColumnsForDisplay  = (rawColumns) => {
         const gridColumns = [];
         for (let col of rawColumns){
@@ -115,12 +151,12 @@ const  TableData = (props) => {
             key: 'edit',
             render: (_, record) => {
                 return <Button type="primary" onClick={() => {
-                    alert('not implemented yet')
+                        handleDeleteItem(record.key,record, rawColumns);
                     }} >
                     Delete
                 </Button>
             },
-        })
+        });
 
         setTableColumns(gridColumns);
     }

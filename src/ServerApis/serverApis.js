@@ -28,7 +28,7 @@ const post = (route, data, headers, onSuccess, onFail) => {
 }
 
 const put = (route, data, headers,  onSuccess, onFail) => {
-    const url = SERVER_ADDRESS + route ;
+    const url = SERVER_ADDRESS + route;
     axios.put(url, data, headers).then(result =>{
         console.log(result);
         onSuccess(result);
@@ -38,9 +38,9 @@ const put = (route, data, headers,  onSuccess, onFail) => {
     });
 }
 
-const del = (route, data, onSuccess, onFail) =>{
-    const url = SERVER_ADDRESS + route + data;
-    axios.delete(url).then(result=>{
+const del = (route, data,headers, onSuccess, onFail) =>{
+    const url = SERVER_ADDRESS + route;
+    axios.delete(url,{headers, 'data':data}).then(result=>{
         onSuccess(result);
     }).catch(err => {
         console.log(err);
